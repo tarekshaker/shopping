@@ -1,0 +1,181 @@
+<?php
+
+namespace AppBundle\Controller;
+
+use AppBundle\Entity\Cart_items;
+use AppBundle\Entity\Carts;
+use AppBundle\Entity\Products;
+use AppBundle\Form\Type\ProductsType;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\Session;
+
+class ProductsController extends Controller
+{
+    /**
+     * @Route("/", name="homepage")
+     */
+    public function indexAction(Request $request)
+    {
+
+        $session = $this->get('request_stack')->getCurrentRequest()->getSession();
+        $session_id = $session->getId();
+
+        if ($session_id == '') {
+            $session->start();
+        }
+        $check_session = $this->getDoctrine()
+            ->getRepository(Carts::class)
+            ->check_session($session_id);
+
+        if (empty($check_session)) {
+
+            $cart = new Carts();
+
+            $session_id = $session->getId();
+
+
+            $em = $this->getDoctrine()->getManager();
+
+            $cart->setSessionId($session_id);
+            $cart->setTotalPrice(0);
+
+            $em->persist($cart);
+            $em->flush();
+
+            $cart_id = $cart->getId();
+
+            $session->set('cart', $cart_id);
+
+        } else {
+            $session->set('cart', $check_session[0]->getId());
+        }
+
+
+        $empty = false;
+        $products = $this->getDoctrine()
+            ->getRepository(Products::class)
+            ->findAllProducts();
+
+        $cart = $session->get('cart');
+
+        $cart_products = $this->getDoctrine()
+            ->getRepository(Cart_items::class)
+            ->findAllProductsInCart($cart);
+
+        if (empty($cart_products)) {
+            $empty = true;
+        }
+
+        $wish_list = $this->getDoctrine()
+            ->getRepository(Cart_items::class)
+            ->findWishListProducts($cart);
+
+        $wish_list_array = array();
+        foreach ($wish_list as $wishlistItem) {
+
+            $wish_list_array[] = $wishlistItem['product_id']['id'];
+        }
+
+        return $this->render('shop/products.html.twig', array(
+            'products' => $products, 'cart_products' => $cart_products, 'empty' => $empty, 'wish_list' => $wish_list_array));
+    }
+
+
+    /**
+     * @Route("/add_product", name="add")
+     */
+    public function addAction(Request $request)
+    {
+
+        $products = new Products();
+        $form = $this->createAddProductForm($products);
+
+        return $this->render('shop/add_product.html.twig', array(
+            'add_product_form' => $form->createView(),
+        ));
+    }
+
+    /**
+     * @param Request $request
+     * @Route("/add-product-form-submission", name="handle_add_product_form_submission")
+     * @Method("POST")
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse\Response|\Symfony\Component\HttpFoundation\Response
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
+     */
+    public function handleFormSubmissionAction(Request $request)
+    {
+
+        $product = new Products();
+        $form = $this->createAddProductForm($product);
+
+        $form->handleRequest($request);
+
+        if (!$form->isSubmitted() || !$form->isValid()) {
+
+            return $this->render('shop/add_product.html.twig', [
+
+                'add_product_form' => $form->createView(),
+
+            ]);
+        }
+
+        // handle price with sale amount
+        $price = $product->getPrice();
+        $saleAmount = $product->getSaleAmount();
+
+        if ($saleAmount != '') {
+            $price = $price - ($price * $saleAmount / 100);
+            $product->setPrice($price);
+        }
+
+        // prepare image to upload
+        $file = $product->getImage();
+
+        if ($file != null) {
+            $fileName = $this->generateUniqueFileName() . '.' . $file->guessExtension();
+
+
+            // moves the file to the directory where images are stored
+            $file->move(
+                $this->getParameter('images_directory'),
+                $fileName
+            );
+
+            $product->setImage($fileName);
+        }
+
+        $em = $this->getDoctrine()->getManager();
+        $em->persist($product);
+        $em->flush();
+
+        $this->addFlash('success', 'The product added successfully');
+        return $this->redirectToRoute('homepage');
+
+    }
+
+
+    /**
+     * @param $products
+     * @return \Symfony\Component\Form\FormInterface
+     */
+    private function createAddProductForm($products)
+    {
+        $form = $this->createForm(ProductsType::class, $products, [
+            'action' => $this->generateUrl('handle_add_product_form_submission'),
+        ]);
+        return $form;
+    }
+
+
+    //Generate unique file name in image upload
+    private function generateUniqueFileName()
+    {
+        // md5() reduces the similarity of the file names generated by
+        // uniqid(), which is based on timestamps
+        return md5(uniqid());
+    }
+}

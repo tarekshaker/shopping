@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+
+{% form_theme add_product_form 'bootstrap_4_layout.html.twig' %}
+
+{% block body %}
+
+     {% block account %}
+
+     {% endblock account %}
+
+    <div class="section">
+        <!-- container -->
+        <div class="container">
+            <!-- row -->
+            <div class="row">
+                {{ form_start(add_product_form) }}
+                {{ form_widget(add_product_form) }}
+                {{ form_end(add_product_form) }}
+            </div>
+            <!-- /row -->
+        </div>
+        <!-- /container -->
+    </div>
+
+
+
+
+
+{% endblock %}
+
+{% block stylesheets %}
+
+{% endblock %}
+
+

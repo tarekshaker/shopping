@@ -1,0 +1,165 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+    {% block account %}
+
+    {% endblock account %}
+
+
+    <!-- SECTION -->
+    <div class="section">
+        <!-- container -->
+        <div class="container">
+            <!-- row -->
+            <div class="row">
+
+                <!-- section title -->
+                <div class="col-md-12">
+                    <div class="section-title">
+                        <h3 class="title">Wishlist</h3>
+                    </div>
+                </div>
+                <!-- /section title -->
+
+                <!-- Products tab & slick -->
+                <div class="col-md-12">
+                    <div class="row" id="displayWishList">
+                        <!-- Cart -->
+
+                        {#{{ dump(cart_list) }}#}
+                        {#{{ dump(selected_product) }}#}
+                        {% if wish_list|length > 0 %}
+                            {#<form action="{{ path('updateCart') }}" method="POST">#}
+                                <table id="cart" class="table table-hover table-condensed">
+                                    <thead>
+                                    <tr>
+                                        <th style="width:60%">Product</th>
+                                        <th style="width:20%">Price</th>
+                                        <th style="width:20%"></th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+
+                                    {% for wish_list_item in wish_list %}
+                                        <tr data-id="{{ wish_list_item.id }}">
+                                            <td data-th="Product">
+                                                <input type="hidden" name="productId[]" id="productId"
+                                                       value="{{ wish_list_item['product_id'].id }}"/>
+                                                <div class="row">
+                                                    <div class="col-sm-2 hidden-xs"><img
+                                                                src="./img/{% if wish_list_item['product_id'].image == null %}{{ 'no-image.png' }}{% endif %}{{ wish_list_item['product_id'].image }}"
+                                                                alt="..." class="img-responsive"/></div>
+                                                    <div class="col-sm-10">
+                                                        <h4 class="nomargin">{{ wish_list_item['product_id'].productName }}</h4>
+                                                        <p>{{ wish_list_item['product_id'].productDesc }}</p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td data-th="Price" id="product_price" class="price" name="price">${{ wish_list_item['product_id'].price }}</td>
+
+                                            <td class="actions" data-th="">
+                                                <button class="btn btn-danger btn-sm removeItemWishList"><i
+                                                            class="fa fa-trash-o"></i></button>
+                                                <button class="btn btn-success btn-sm moveToCart"><i
+                                                            class="fa fa-arrow-circle-o-right"></i> Move to Cart</button>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    <tfoot>
+                                    <tr class="visible-xs">
+                                    <td class="text-center" class="grandTotal"><strong></strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <a class="btn btn-success update_cart" href="{{ path('homepage') }}">
+                                                <i class="fa fa-shopping-bag"></i> Back to shop
+                                            </a>
+                                        </td>
+                                        <td class="hidden-xs"></td>
+
+                                        <td><button class="btn btn-danger btn-block removeAllWishListItems">Clear Wishlist <i
+                                                        class="fa fa-trash-o"></i></button></td>
+                                    </tr>
+                                    </tfoot>
+                                    </tbody>
+                                </table>
+                            {#</form>#}
+
+
+
+                        {% else %}
+                        <div class="alert alert-warning">
+                            <strong>Warning!</strong> There are no items in your wishlist
+                        </div>
+                        <a href="/" class="btn btn-success">
+                            <i class="fa fa-shopping-bag"></i> Back to shop
+                        </a>
+                        {% endif %}
+                        <!-- /Cart -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- start: Delete Wish List Item Modal -->
+    <div class="modal fade" id="myModal3" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h3 class="modal-title" id="myModalLabel">Warning!</h3>
+
+                </div>
+                <div class="modal-body">
+                    <h4> Are you sure you want to delete this item?</h4>
+
+                </div>
+                <!--/modal-body-collapse -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" id="deleteWishListItem" href="#">Yes</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+                </div>
+                <!--/modal-footer-collapse -->
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+    <!-- /.modal -->
+
+
+    <!-- start: Delete All Wish List Items Modal -->
+    <div class="modal fade" id="myModal4" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h3 class="modal-title" id="myModalLabel">Warning!</h3>
+
+                </div>
+                <div class="modal-body">
+                    <h4> Are you sure you want to delete all items?</h4>
+
+                </div>
+                <!--/modal-body-collapse -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" id="deleteAllWishList" href="#">Yes</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+                </div>
+                <!--/modal-footer-collapse -->
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+    <!-- /.modal -->
+
+{% endblock %}
+
+
+
+
+

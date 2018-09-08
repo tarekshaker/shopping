@@ -1,0 +1,91 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+
+    <!-- SECTION -->
+    <div class="section">
+        <!-- container -->
+        <div class="container">
+            <!-- row -->
+            <div class="row">
+
+                <!-- section title -->
+                <div class="col-md-12">
+                    <div class="section-title">
+                        <h3 class="title">All Products</h3>
+                    </div>
+                </div>
+                <!-- /section title -->
+
+                <!-- Products tab & slick -->
+                <div class="col-md-12">
+                    <div class="row">
+                        <div class="products-tabs">
+                            <!-- tab -->
+                            <div id="tab1" class="tab-pane active">
+                                <div class="products-slick" data-nav="#slick-nav-1">
+                                    <!-- product -->
+                                    {% for product in products %}
+                                        {% if product.id > 0 %}
+
+                                        <div class="product" id="{{ product.id }}">
+                                            <div class="product-img">
+                                                <img src="./img/{% if product.image == null %}{{ 'no-image.png' }}{% endif %}{{ product.image }}"
+                                                     alt="">
+                                                <div class="product-label">
+                                                    {% if product.productType['id'] == '2' %}
+                                                        <span class="sale">-{{ product.saleAmount }}%</span>
+                                                        <span class="new">SALE</span>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            <div class="product-body">
+                                                <h3 class="product-name"><a href="#">{{ product.productName }}</a></h3>
+                                                <h4 class="product-price">
+                                                    {{ product.price }}
+                                                    {% if product.saleAmount != '' %}
+                                                        <del class="product-old-price">
+                                                            {{ product.price / (1 - product.saleAmount/100) }}
+                                                        </del>
+                                                    {% endif %}
+                                                </h4>
+
+                                                <div class="product-btns">
+                                                    <button class="add-to-wishlist"><i class="{% if product.id in wish_list %}fa fa-heart {% else %} fa fa-heart-o {% endif %}" {% if product.id in wish_list %} style="color:red;" {% endif %}></i><span
+                                                                class="tooltipp">add to wishlist</span></button>
+                                                    {#<button class="quick-view"><i class="fa fa-eye"></i><span#}
+                                                                {#class="tooltipp">quick view</span></button>#}
+                                                </div>
+                                            </div>
+                                            <div class="add-to-cart">
+                                                <form action="{{ path('addToCart') }}" method="POST">
+                                                    <input type="hidden" name="productId" value="{{ product.id }}"/>
+                                                    <button class="add-to-cart-btn">
+                                                        <i class="fa fa-shopping-cart"></i>Add
+                                                        to cart</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <!-- /product -->
+                                    {% endif %}
+                                    {% endfor %}
+
+
+                                </div>
+                                <div id="slick-nav-1" class="products-slick-nav"></div>
+                            </div>
+                            <!-- /tab -->
+                        </div>
+                    </div>
+                </div>
+                <!-- Products tab & slick -->
+            </div>
+            <!-- /row -->
+        </div>
+        <!-- /container -->
+    </div>
+    <!-- /SECTION -->
+
+
+{% endblock %}
